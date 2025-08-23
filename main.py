@@ -54,6 +54,15 @@ def find_window_by_title_exact(title: str):
     EnumWindows(enum_proc, 0)
     return result[0] if result else None
 
+import os
+
+def resource_path(filename: str) -> str:
+    """返回资源文件的正确路径，兼容 PyInstaller 打包环境"""
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, filename)
+    return os.path.join(os.path.abspath("."), filename)
+
+
 
 def get_window_rect(hwnd):
     r = wt.RECT()
@@ -271,7 +280,9 @@ class OverlayWindow(QWidget):
         self.label = QLabel(self)
         self.label.setAlignment(Qt.AlignCenter)
 
-        self.pixmap = QPixmap(image_path)
+        self.pixmap = QPixmap(resource_path(image_path))
+        if self.pixmap.isNull():
+            print(f"[!] 图片加载失败: {resource_path(image_path)}")
         self.hwnd_parent = hwnd_parent
         self.rel_offset = rel_offset
 
